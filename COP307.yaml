@@ -1,4 +1,4 @@
-Description: 'Cloud9 For COP307 Re:Invent session'
+Description: Cloud9 For COP307 Re:Invent session
 Parameters:
   EnvironmentName:
     Description: An environment name that is prefixed to resource names
@@ -17,9 +17,7 @@ Parameters:
     Description: Password for the RDS DB master user
   DefaultRDPIngress:
     Type: String
-    Description: >-
-      IP address for security group ingress. Default to 0.0.0.0/0 (open to
-      public)
+    Description: IP address for security group ingress. Default to 0.0.0.0/0 (open to public)
     Default: 0.0.0.0/0
   EETeamRoleArn:
     Description: ARN of the Team Role
@@ -43,9 +41,7 @@ Parameters:
     Description: All IPs in 2 VPCs
     Default: 10.0.0.0/8
   PublicSubnet1CIDR:
-    Description: >-
-      Please enter the IP range (CIDR notation) for the public subnet in the
-      first Availability Zone
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
     Type: String
     Default: 10.0.1.0/24
   TagKeyAppInsights:
@@ -79,7 +75,7 @@ Mappings:
       ImageId: ami-0b319c767014a9dad
 Resources:
   VPC:
-    Type: 'AWS::EC2::VPC'
+    Type: AWS::EC2::VPC
     Properties:
       CidrBlock: !Ref VpcCIDR1
       EnableDnsSupport: true
@@ -88,126 +84,126 @@ Resources:
         - Key: Name
           Value: !Ref EnvironmentName
   AdventureWorksVpc:
-    Type: 'AWS::EC2::VPC'
+    Type: AWS::EC2::VPC
     Properties:
       CidrBlock: !Ref VpcCIDR2
       EnableDnsSupport: true
       EnableDnsHostnames: true
       InstanceTenancy: default
   VpcPeeringConnection:
-    Type: 'AWS::EC2::VPCPeeringConnection'
+    Type: AWS::EC2::VPCPeeringConnection
     Properties:
       VpcId: !Ref VPC
       PeerVpcId: !Ref AdventureWorksVpc
   InternetGateway:
-    Type: 'AWS::EC2::InternetGateway'
+    Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
           Value: !Ref EnvironmentName
   InternetGatewayAttachment:
-    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       InternetGatewayId: !Ref InternetGateway
       VpcId: !Ref VPC
   PublicSubnet1:
-    Type: 'AWS::EC2::Subnet'
+    Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select 
+      AvailabilityZone: !Select
         - 0
         - !GetAZs ''
       CidrBlock: !Ref PublicSubnet1CIDR
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub '${EnvironmentName} Public Subnet (AZ1)'
+          Value: !Sub ${EnvironmentName} Public Subnet (AZ1)
   PublicRouteTable:
-    Type: 'AWS::EC2::RouteTable'
+    Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub '${EnvironmentName} Public Routes'
+          Value: !Sub ${EnvironmentName} Public Routes
   DefaultPublicRoute:
-    Type: 'AWS::EC2::Route'
+    Type: AWS::EC2::Route
     DependsOn: InternetGatewayAttachment
     Properties:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
   PeerVPCRoute:
-    Type: 'AWS::EC2::Route'
+    Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 10.1.0.0/16
       VpcPeeringConnectionId: !Ref VpcPeeringConnection
   PublicSubnet1RouteTableAssociation:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet1
   AdventureWorksSubnet1:
-    Type: 'AWS::EC2::Subnet'
+    Type: AWS::EC2::Subnet
     Properties:
       CidrBlock: 10.1.0.0/24
-      AvailabilityZone: !Select 
+      AvailabilityZone: !Select
         - 0
-        - !GetAZs 
-          Ref: 'AWS::Region'
+        - !GetAZs
+          Ref: AWS::Region
       MapPublicIpOnLaunch: true
       VpcId: !Ref AdventureWorksVpc
   AdventureWorksSubnet2:
-    Type: 'AWS::EC2::Subnet'
+    Type: AWS::EC2::Subnet
     Properties:
       CidrBlock: 10.1.128.0/24
-      AvailabilityZone: !Select 
+      AvailabilityZone: !Select
         - 1
-        - !GetAZs 
-          Ref: 'AWS::Region'
+        - !GetAZs
+          Ref: AWS::Region
       MapPublicIpOnLaunch: true
       VpcId: !Ref AdventureWorksVpc
   Subnet1RouteTableAssociation:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref AdventureWorksRouteTable
       SubnetId: !Ref AdventureWorksSubnet1
   Subnet2RouteTableAssociation:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref AdventureWorksRouteTable
       SubnetId: !Ref AdventureWorksSubnet2
   AdventureWorksInternetGateway:
-    Type: 'AWS::EC2::InternetGateway'
+    Type: AWS::EC2::InternetGateway
     Properties: {}
   AdventureWorksVpcGatewayAttachment:
-    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       InternetGatewayId: !Ref AdventureWorksInternetGateway
       VpcId: !Ref AdventureWorksVpc
   AdventureWorksRouteTable:
-    Type: 'AWS::EC2::RouteTable'
+    Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref AdventureWorksVpc
   PeerAdventureWorksRoute:
-    Type: 'AWS::EC2::Route'
+    Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref AdventureWorksRouteTable
       DestinationCidrBlock: 10.0.0.0/16
       VpcPeeringConnectionId: !Ref VpcPeeringConnection
   AdventureWorksRoute:
-    Type: 'AWS::EC2::Route'
+    Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref AdventureWorksInternetGateway
       RouteTableId: !Ref AdventureWorksRouteTable
   C9Role:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       RoleName: workshop-admin
       Tags:
         - Key: Environment
-          Value: !Sub '${EnvironmentName}'
+          Value: !Sub ${EnvironmentName}
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -217,23 +213,23 @@ Resources:
                 - ec2.amazonaws.com
                 - ssm.amazonaws.com
             Action:
-              - 'sts:AssumeRole'
+              - sts:AssumeRole
       ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/AdministratorAccess'
-        - 'arn:aws:iam::aws:policy/AWSCloud9Administrator'
+        - arn:aws:iam::aws:policy/AdministratorAccess
+        - arn:aws:iam::aws:policy/AWSCloud9Administrator
       Path: /
   C9SSMDocument:
-    Type: 'AWS::SSM::Document'
+    Type: AWS::SSM::Document
     Properties:
       Tags:
         - Key: Environment
-          Value: !Sub '${EnvironmentName}'
+          Value: !Sub ${EnvironmentName}
       DocumentType: Command
       Content:
         schemaVersion: '2.2'
         description: Bootstrap Cloud9 Instance
         mainSteps:
-          - action: 'aws:runShellScript'
+          - action: aws:runShellScript
             name: C9bootstrap
             inputs:
               timeoutSeconds: '172800'
@@ -243,154 +239,47 @@ Resources:
                 - echo LANG=en_US.utf-8 >> /etc/environment
                 - echo LC_ALL=en_US.UTF-8 >> /etc/environment
                 - echo '=== Clone Git repository ==='
-                - >-
-                  sudo -H -u ec2-user bash -c "git clone
-                  https://github.com/aws-samples/serverless-observability-workshop.git
-                  /home/ec2-user/environment/serverless-demo/"
+                - sudo -H -u ec2-user bash -c "git clone https://github.com/aws-samples/serverless-observability-workshop.git /home/ec2-user/environment/serverless-demo/"
                 - echo '=== Change Code ==='
-                - >-
-                  sudo -H -u ec2-user bash -c "wget
-                  https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/sleep-functions.js
-                  -O /home/ec2-user/environment/sleep-functions.js"
-                - >-
-                  sudo -H -u ec2-user bash -c "wget
-                  https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/reserved-concurrent-template.yaml
-                  -O
-                  /home/ec2-user/environment/serverless-demo/code/sample-app/template.yaml"
-                - >-
-                  sudo -H -u ec2-user bash -c "cat
-                  /home/ec2-user/environment/sleep-functions.js >>
-                  /home/ec2-user/environment/serverless-demo/code/sample-app/src/handlers/get-all-items.js"
-                - >-
-                  sudo -H -u ec2-user bash -c "cat
-                  /home/ec2-user/environment/sleep-functions.js >>
-                  /home/ec2-user/environment/serverless-demo/code/sample-app/src/handlers/get-by-id.js"
-                - >-
-                  sudo -H -u ec2-user bash -c "cat
-                  /home/ec2-user/environment/sleep-functions.js >>
-                  /home/ec2-user/environment/serverless-demo/code/sample-app/src/handlers/put-item.js"
-                - >-
-                  sudo -H -u ec2-user bash -c "rm
-                  /home/ec2-user/environment/sleep-functions.js"
+                - sudo -H -u ec2-user bash -c "wget https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/sleep-functions.js -O /home/ec2-user/environment/sleep-functions.js"
+                - sudo -H -u ec2-user bash -c "wget https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/reserved-concurrent-template.yaml -O /home/ec2-user/environment/serverless-demo/code/sample-app/template.yaml"
+                - sudo -H -u ec2-user bash -c "cat /home/ec2-user/environment/sleep-functions.js >> /home/ec2-user/environment/serverless-demo/code/sample-app/src/handlers/get-all-items.js"
+                - sudo -H -u ec2-user bash -c "cat /home/ec2-user/environment/sleep-functions.js >> /home/ec2-user/environment/serverless-demo/code/sample-app/src/handlers/get-by-id.js"
+                - sudo -H -u ec2-user bash -c "cat /home/ec2-user/environment/sleep-functions.js >> /home/ec2-user/environment/serverless-demo/code/sample-app/src/handlers/put-item.js"
+                - sudo -H -u ec2-user bash -c "rm /home/ec2-user/environment/sleep-functions.js"
                 - echo '=== Setup Infrastructure Components ==='
                 - sudo yum install -y jq
                 - sudo yum install epel-release
                 - sudo yum install -y cpulimit\
                 - sudo yum install postgresql-contrib -y
                 - sudo amazon-linux-extras install -y postgresql14
-                - >-
-                  sudo -H -i -u ec2-user bash -c "cd
-                  /home/ec2-user/environment/serverless-demo/code/sample-app/ &&
-                  npm install && sam build &>> /home/ec2-user/setup-build.log &&
-                  sam deploy --stack-name devops-guru-scenario01 --resolve-s3
-                  --capabilities CAPABILITY_IAM --no-confirm-changeset --region
-                  `curl
-                  http://169.254.169.254/latest/dynamic/instance-identity/document|grep
-                  region|awk -F\\" '{print $4}'` &>>
-                  /home/ec2-user/setup-infra.log"
-                - >-
-                  sudo -H -i -u ec2-user bash -c "cd
-                  /home/ec2-user/environment/serverless-demo/code/sample-app/ &&
-                  npm install && sam build &>> /home/ec2-user/setup-build.log &&
-                  sam deploy --stack-name devops-guru-scenario02 --resolve-s3
-                  --capabilities CAPABILITY_IAM --no-confirm-changeset --region
-                  `curl
-                  http://169.254.169.254/latest/dynamic/instance-identity/document|grep
-                  region|awk -F\\" '{print $4}'` &>>
-                  /home/ec2-user/setup-infra.log"
-                - >-
-                  sudo -H -i -u ec2-user bash -c "cd
-                  /home/ec2-user/environment/serverless-demo/code/sample-app/ &&
-                  npm install && sam build &>> /home/ec2-user/setup-build.log &&
-                  sam deploy --stack-name devops-guru-scenario03 --resolve-s3
-                  --capabilities CAPABILITY_IAM --no-confirm-changeset --region
-                  `curl
-                  http://169.254.169.254/latest/dynamic/instance-identity/document|grep
-                  region|awk -F\\" '{print $4}'` &>>
-                  /home/ec2-user/setup-infra.log"
-                - >-
-                  sudo -H -i -u ec2-user bash -c "cd
-                  /home/ec2-user/environment/serverless-demo/code/sample-app/ &&
-                  npm install && sam build &>> /home/ec2-user/setup-build.log &&
-                  sam deploy --stack-name devops-guru-scenario04 --resolve-s3
-                  --capabilities CAPABILITY_IAM --no-confirm-changeset --region
-                  `curl
-                  http://169.254.169.254/latest/dynamic/instance-identity/document|grep
-                  region|awk -F\\" '{print $4}'` &>>
-                  /home/ec2-user/setup-infra.log"
-                - >-
-                  sudo -H -i -u ec2-user bash -c "cd
-                  /home/ec2-user/environment/serverless-demo/code/sample-app-tracing/
-                  && npm install && sam build &>> /home/ec2-user/setup-build.log
-                  && sam deploy --stack-name anomalydetection-serverless
-                  --resolve-s3 --capabilities CAPABILITY_IAM
-                  --no-confirm-changeset --region `curl
-                  http://169.254.169.254/latest/dynamic/instance-identity/document|grep
-                  region|awk -F\\" '{print $4}'` &>>
-                  /home/ec2-user/setup-infra.log"
+                - sudo -H -i -u ec2-user bash -c "cd /home/ec2-user/environment/serverless-demo/code/sample-app/ && npm install && sam build &>> /home/ec2-user/setup-build.log && sam deploy --stack-name devops-guru-scenario01 --resolve-s3 --capabilities CAPABILITY_IAM --no-confirm-changeset --region `curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\\" '{print $4}'` &>> /home/ec2-user/setup-infra.log"
+                - sudo -H -i -u ec2-user bash -c "cd /home/ec2-user/environment/serverless-demo/code/sample-app/ && npm install && sam build &>> /home/ec2-user/setup-build.log && sam deploy --stack-name devops-guru-scenario02 --resolve-s3 --capabilities CAPABILITY_IAM --no-confirm-changeset --region `curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\\" '{print $4}'` &>> /home/ec2-user/setup-infra.log"
+                - sudo -H -i -u ec2-user bash -c "cd /home/ec2-user/environment/serverless-demo/code/sample-app/ && npm install && sam build &>> /home/ec2-user/setup-build.log && sam deploy --stack-name devops-guru-scenario03 --resolve-s3 --capabilities CAPABILITY_IAM --no-confirm-changeset --region `curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\\" '{print $4}'` &>> /home/ec2-user/setup-infra.log"
+                - sudo -H -i -u ec2-user bash -c "cd /home/ec2-user/environment/serverless-demo/code/sample-app/ && npm install && sam build &>> /home/ec2-user/setup-build.log && sam deploy --stack-name devops-guru-scenario04 --resolve-s3 --capabilities CAPABILITY_IAM --no-confirm-changeset --region `curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\\" '{print $4}'` &>> /home/ec2-user/setup-infra.log"
+                - sudo -H -i -u ec2-user bash -c "cd /home/ec2-user/environment/serverless-demo/code/sample-app-tracing/ && npm install && sam build &>> /home/ec2-user/setup-build.log && sam deploy --stack-name anomalydetection-serverless --resolve-s3 --capabilities CAPABILITY_IAM --no-confirm-changeset --region `curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\\" '{print $4}'` &>> /home/ec2-user/setup-infra.log"
                 - echo '=== Create DevOps Anomaly Detection Simulators ==='
-                - >-
-                  sudo -H -i -u ec2-user bash -c 'cd /home/ec2-user/environment/
-                  && mkdir -p simulators && cd simulators'
-                - >-
-                  sudo -H -i -u ec2-user bash -c 'wget
-                  https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/bootstrap.sh
-                  -O /home/ec2-user/environment/simulators/bootstrap.sh'
-                - >-
-                  sudo -H -i -u ec2-user bash -c 'wget
-                  https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/anomalydetection-trigger-throttles.sh
-                  -O
-                  /home/ec2-user/environment/simulators/anomalydetection-trigger-throttles.sh'
-                - >-
-                  sudo -H -i -u ec2-user bash -c 'wget
-                  https://ws-assets-prod-iad-r-sfo-f61fc67057535f1b.s3.us-west-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/app-insights-problem-generator.sh
-                  -O
-                  /home/ec2-user/environment/simulators/app-insights-problem-generator.sh'
-                - >-
-                  sudo -H -i -u ec2-user bash -c 'wget
-                  https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/rds-load-test.sh
-                  -O /home/ec2-user/environment/simulators/rds-load-test.sh'
-                - >-
-                  sudo -H -i -u ec2-user bash -c 'wget
-                  https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/validation.sh
-                  -O /home/ec2-user/environment/simulators/validation.sh'
-                - >-
-                  sudo -H -i -u ec2-user bash -c "chmod -R 777 
-                  /home/ec2-user/environment/simulators"
+                - sudo -H -i -u ec2-user bash -c 'cd /home/ec2-user/environment/ && mkdir -p simulators && cd simulators'
+                - sudo -H -i -u ec2-user bash -c 'wget https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/bootstrap.sh -O /home/ec2-user/environment/simulators/bootstrap.sh'
+                - sudo -H -i -u ec2-user bash -c 'wget https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/anomalydetection-trigger-throttles.sh -O /home/ec2-user/environment/simulators/anomalydetection-trigger-throttles.sh'
+                - sudo -H -i -u ec2-user bash -c 'wget https://ws-assets-prod-iad-r-sfo-f61fc67057535f1b.s3.us-west-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/app-insights-problem-generator.sh -O /home/ec2-user/environment/simulators/app-insights-problem-generator.sh'
+                - sudo -H -i -u ec2-user bash -c 'wget https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/rds-load-test.sh -O /home/ec2-user/environment/simulators/rds-load-test.sh'
+                - sudo -H -i -u ec2-user bash -c 'wget https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/validation.sh -O /home/ec2-user/environment/simulators/validation.sh'
+                - sudo -H -i -u ec2-user bash -c "chmod -R 777  /home/ec2-user/environment/simulators"
                 - echo '=== Run Basic Simulators ==='
-                - >-
-                  sudo wget
-                  https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/bootstrap.service
-                  -O /lib/systemd/system/workshop-bootstrap.service
-                - >-
-                  sudo chmod +x
-                  /home/ec2-user/environment/simulators/bootstrap.sh
+                - sudo wget https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/fd3ee93c-5722-46ef-b0a5-bdfcff61e622/bootstrap.service -O /lib/systemd/system/workshop-bootstrap.service
+                - sudo chmod +x /home/ec2-user/environment/simulators/bootstrap.sh
                 - sudo systemctl daemon-reload
                 - sudo systemctl enable workshop-bootstrap.service
                 - sudo systemctl start workshop-bootstrap.service
                 - echo '=== Add Resources to DevOps Guru ==='
-                - >-
-                  sudo -H -i -u ec2-user bash -c "/usr/local/bin/aws devops-guru
-                  update-resource-collection --action ADD --resource-collection
-                  {\\\"CloudFormation\\\":{\\\"StackNames\\\":[\\\"devops-guru-scenario01\\\"]}}"
-                - >-
-                  sudo -H -i -u ec2-user bash -c "/usr/local/bin/aws devops-guru
-                  update-resource-collection --action ADD --resource-collection
-                  {\\\"CloudFormation\\\":{\\\"StackNames\\\":[\\\"devops-guru-scenario02\\\"]}}"
-                - >-
-                  sudo -H -i -u ec2-user bash -c "/usr/local/bin/aws devops-guru
-                  update-resource-collection --action ADD --resource-collection
-                  {\\\"CloudFormation\\\":{\\\"StackNames\\\":[\\\"devops-guru-scenario03\\\"]}}"
-                - >-
-                  sudo -H -i -u ec2-user bash -c "/usr/local/bin/aws devops-guru
-                  update-resource-collection --action ADD --resource-collection
-                  {\\\"CloudFormation\\\":{\\\"StackNames\\\":[\\\"devops-guru-scenario04\\\"]}}"
-                - >-
-                  sudo -H -i -u ec2-user bash -c "/usr/local/bin/aws devops-guru
-                  update-resource-collection --action ADD --resource-collection
-                  {\\\"CloudFormation\\\":{\\\"StackNames\\\":[\\\"cop307-ri-2023\\\"]}}"
+                - sudo -H -i -u ec2-user bash -c "/usr/local/bin/aws devops-guru update-resource-collection --action ADD --resource-collection {\\\"CloudFormation\\\":{\\\"StackNames\\\":[\\\"devops-guru-scenario01\\\"]}}"
+                - sudo -H -i -u ec2-user bash -c "/usr/local/bin/aws devops-guru update-resource-collection --action ADD --resource-collection {\\\"CloudFormation\\\":{\\\"StackNames\\\":[\\\"devops-guru-scenario02\\\"]}}"
+                - sudo -H -i -u ec2-user bash -c "/usr/local/bin/aws devops-guru update-resource-collection --action ADD --resource-collection {\\\"CloudFormation\\\":{\\\"StackNames\\\":[\\\"devops-guru-scenario03\\\"]}}"
+                - sudo -H -i -u ec2-user bash -c "/usr/local/bin/aws devops-guru update-resource-collection --action ADD --resource-collection {\\\"CloudFormation\\\":{\\\"StackNames\\\":[\\\"devops-guru-scenario04\\\"]}}"
+                - sudo -H -i -u ec2-user bash -c "/usr/local/bin/aws devops-guru update-resource-collection --action ADD --resource-collection {\\\"CloudFormation\\\":{\\\"StackNames\\\":[\\\"cop307-ri-2023\\\"]}}"
   C9OutputBucket:
-    Type: 'AWS::S3::Bucket'
+    Type: AWS::S3::Bucket
     DeletionPolicy: Retain
     Properties:
       AccessControl: Private
@@ -404,7 +293,7 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
   AWSCloud9SSMAccessRole:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -415,21 +304,21 @@ Resources:
                 - cloud9.amazonaws.com
                 - ec2.amazonaws.com
             Action:
-              - 'sts:AssumeRole'
+              - sts:AssumeRole
       Description: Service linked role for AWS Cloud9
       Path: /service-role/
       ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/AdministratorAccess'
+        - arn:aws:iam::aws:policy/AdministratorAccess
       RoleName: AWSCloud9SSMAccessRole
   AWSCloud9SSMInstanceProfile:
-    Type: 'AWS::IAM::InstanceProfile'
+    Type: AWS::IAM::InstanceProfile
     Properties:
       InstanceProfileName: AWSCloud9SSMInstanceProfile
       Path: /cloud9/
       Roles:
         - !Ref AWSCloud9SSMAccessRole
   C9BootstrapAssociation:
-    Type: 'AWS::SSM::Association'
+    Type: AWS::SSM::Association
     Properties:
       Name: !Ref C9SSMDocument
       OutputLocation:
@@ -437,11 +326,11 @@ Resources:
           OutputS3BucketName: !Ref C9OutputBucket
           OutputS3KeyPrefix: bootstrapoutput
       Targets:
-        - Key: 'tag:SSMBootstrap'
+        - Key: tag:SSMBootstrap
           Values:
             - Active
   C9InstanceProfile:
-    Type: 'AWS::IAM::InstanceProfile'
+    Type: AWS::IAM::InstanceProfile
     Properties:
       Path: /
       InstanceProfileName: workshop-admin
@@ -451,31 +340,31 @@ Resources:
     DependsOn:
       - C9BootstrapAssociation
       - RdsInstance
-    Type: 'AWS::Cloud9::EnvironmentEC2'
+    Type: AWS::Cloud9::EnvironmentEC2
     Properties:
-      Description: !Sub 'AWS Cloud9 instance for ${EnvironmentName}'
+      Description: !Sub AWS Cloud9 instance for ${EnvironmentName}
       SubnetId: !Ref PublicSubnet1
       ImageId: amazonlinux-2-x86_64
       ConnectionType: CONNECT_SSM
       AutomaticStopTimeMinutes: 3600
       InstanceType: !Ref C9InstanceType
       Name: workshop-env
-      OwnerArn: !Join 
+      OwnerArn: !Join
         - ''
         - - 'arn:aws:iam::'
-          - !Ref 'AWS::AccountId'
+          - !Ref AWS::AccountId
           - ':assumed-role/WSParticipantRole/Participant'
       Tags:
         - Key: SSMBootstrap
           Value: Active
         - Key: Environment
-          Value: !Sub '${EnvironmentName}'
+          Value: !Sub ${EnvironmentName}
   EC2KeyName:
-    Type: 'AWS::EC2::KeyPair'
+    Type: AWS::EC2::KeyPair
     Properties:
       KeyName: MyKeyPair
   ApplicationLoadBalancer:
-    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Subnets:
         - !Ref AdventureWorksSubnet1
@@ -487,7 +376,7 @@ Resources:
           Value: !Ref TagValueAppInsights
     DependsOn: AdventureWorksInternetGateway
   ALBListener:
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       DefaultActions:
         - Type: forward
@@ -496,7 +385,7 @@ Resources:
       Port: 80
       Protocol: HTTP
   ALBTargetGroup:
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckIntervalSeconds: 10
       HealthCheckTimeoutSeconds: 5
@@ -509,7 +398,7 @@ Resources:
         - Key: !Ref TagKeyAppInsights
           Value: !Ref TagValueAppInsights
   RdsInstance:
-    Type: 'AWS::RDS::DBInstance'
+    Type: AWS::RDS::DBInstance
     Properties:
       DBInstanceClass: db.t3.xlarge
       MultiAZ: false
@@ -524,9 +413,7 @@ Resources:
       AllocatedStorage: '50'
       StorageEncrypted: false
       StorageType: standard
-      MonitoringRoleArn: !GetAtt 
-        - RdsEmRole
-        - Arn
+      MonitoringRoleArn: !GetAtt RdsEmRole.Arn
       MonitoringInterval: 15
       BackupRetentionPeriod: 1
       DeleteAutomatedBackups: true
@@ -537,14 +424,14 @@ Resources:
         - Key: !Ref TagKeyAppInsights
           Value: !Ref TagValueAppInsights
   AdventureWorksDBSubnetGroup:
-    Type: 'AWS::RDS::DBSubnetGroup'
+    Type: AWS::RDS::DBSubnetGroup
     Properties:
       DBSubnetGroupDescription: AdventureWorks DB Subnet Group
       SubnetIds:
         - !Ref AdventureWorksSubnet1
         - !Ref AdventureWorksSubnet2
   DotNETAutoScalingGroup:
-    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
         - !Ref AdventureWorksSubnet1
@@ -559,90 +446,56 @@ Resources:
           Value: !Ref TagValueAppInsights
           PropagateAtLaunch: true
   DotNetLaunchConfig:
-    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       KeyName: !Ref EC2KeyName
-      ImageId: !FindInMap 
+      ImageId: !FindInMap
         - RegionImageMappings
-        - !Ref 'AWS::Region'
+        - !Ref AWS::Region
         - ImageId
       IamInstanceProfile: !Ref EC2InstanceProfile
       InstanceType: !Ref DotNETInstanceType
       SecurityGroups:
         - !Ref WebServerSecurityGroup
       InstanceMonitoring: true
-      UserData: !Base64 
-        'Fn::Sub': >
+      UserData: !Base64
+        Fn::Sub: |
           <powershell>
-
           $SQLSecrets = Get-SECSecretValue -SecretId ${SQLSecrets}
-
-
           $secret = $SQLSecrets.SecretString | ConvertFrom-Json
-
           $username = $secret.username
-
           $password = $secret.password
-
           $endpoint = "${RdsInstance.Endpoint.Address}"
-
-
-          # Dynamically populate the Web.Config file with SQL Server DNS name,
-          User Id, and password.
-
-          ((Get-Content -path C:\inetpub\wwwroot\sampleapp\Web.config -Raw)
-          -replace 'USER_PASS', $password) -replace 'DNS_NAME', $endpoint
-          -replace 'USER_ID', $username | Set-Content -path
-          C:\inetpub\wwwroot\sampleapp\Web.config
-
-
+          # Dynamically populate the Web.Config file with SQL Server DNS name, User Id, and password.
+          ((Get-Content -path C:\inetpub\wwwroot\sampleapp\Web.config -Raw) -replace 'USER_PASS', $password) -replace 'DNS_NAME', $endpoint -replace 'USER_ID', $username | Set-Content -path C:\inetpub\wwwroot\sampleapp\Web.config
           # Install and run X-ray Daemon
-
           if ( Get-Service "AWSXRayDaemon" -ErrorAction SilentlyContinue ){
             sc.exe stop AWSXRayDaemon
             sc.exe delete AWSXRayDaemon
           }
-
           if ( Get-Item -path aws-xray-daemon -ErrorAction SilentlyContinue ) {
             Remove-Item -Recurse -Force aws-xray-daemon
           }
-
-
           $currentLocation = Get-Location
-
           $zipFileName = "aws-xray-daemon-windows-service-3.x.zip"
-
           $zipPath = "$currentLocation\$zipFileName"
-
           $destPath = "$currentLocation\aws-xray-daemon"
-
           $daemonPath = "$destPath\xray.exe"
-
           $daemonLogPath = "C:\inetpub\wwwroot\xray-daemon.log"
-
-          $url =
-          "https://s3.dualstack.us-west-2.amazonaws.com/aws-xray-assets.us-west-2/xray-daemon/aws-xray-daemon-windows-service-3.x.zip"
-
-
+          $url = "https://s3.dualstack.us-west-2.amazonaws.com/aws-xray-assets.us-west-2/xray-daemon/aws-xray-daemon-windows-service-3.x.zip"
           Invoke-WebRequest -Uri $url -OutFile $zipPath
-
           Add-Type -Assembly "System.IO.Compression.Filesystem"
-
           [io.compression.zipfile]::ExtractToDirectory($zipPath, $destPath)
-
-
           sc.exe create AWSXRayDaemon binPath= "$daemonPath -f $daemonLogPath"
-
           sc.exe start AWSXRayDaemon
-
           </powershell>
   EC2InstanceProfile:
-    Type: 'AWS::IAM::InstanceProfile'
+    Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
         - !Ref EC2Role
   EC2Role:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -652,11 +505,11 @@ Resources:
               Service:
                 - ec2.amazonaws.com
             Action:
-              - 'sts:AssumeRole'
+              - sts:AssumeRole
       ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess'
-        - 'arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy'
-        - 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore'
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
       Policies:
         - PolicyName: EC2AdventureWorksSecretManagerPolicy
           PolicyDocument:
@@ -664,10 +517,10 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'secretsmanager:GetSecretValue'
+                  - secretsmanager:GetSecretValue
                 Resource: !Ref SQLSecrets
   RdsEmRole:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       RoleName: emaccess
       AssumeRolePolicyDocument:
@@ -678,29 +531,27 @@ Resources:
               Service:
                 - monitoring.rds.amazonaws.com
             Action:
-              - 'sts:AssumeRole'
+              - sts:AssumeRole
       ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole'
+        - arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole
   SQLSecrets:
-    Type: 'AWS::SecretsManager::Secret'
+    Type: AWS::SecretsManager::Secret
     Properties:
       Name: PostgreSQLSecrets
       Description: Secrets manager for Application Insights test application.
-      SecretString: !Sub >-
-        { "username" : "${RDSMasterUsername}", "password" :
-        "${RDSMasterPassword}","endpoint": "${RdsInstance.Endpoint.Address}"}
+      SecretString: !Sub '{ "username" : "${RDSMasterUsername}", "password" : "${RDSMasterPassword}","endpoint": "${RdsInstance.Endpoint.Address}"}'
   WebServerSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroup'
+    Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: AdventureWorks application web server security group.
       VpcId: !Ref AdventureWorksVpc
   PostgreSQLSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroup'
+    Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: AdventureWorks SQL Server database security group.
       VpcId: !Ref AdventureWorksVpc
   DatabaseRDPIngress:
-    Type: 'AWS::EC2::SecurityGroupIngress'
+    Type: AWS::EC2::SecurityGroupIngress
     Properties:
       GroupId: !GetAtt PostgreSQLSecurityGroup.GroupId
       IpProtocol: tcp
@@ -708,7 +559,7 @@ Resources:
       ToPort: 3389
       CidrIp: !Ref DefaultRDPIngress
   DatabaseIngress:
-    Type: 'AWS::EC2::SecurityGroupIngress'
+    Type: AWS::EC2::SecurityGroupIngress
     Properties:
       GroupId: !GetAtt PostgreSQLSecurityGroup.GroupId
       IpProtocol: tcp
@@ -716,7 +567,7 @@ Resources:
       ToPort: 5432
       SourceSecurityGroupId: !GetAtt WebServerSecurityGroup.GroupId
   DatabaseCloud9Ingress:
-    Type: 'AWS::EC2::SecurityGroupIngress'
+    Type: AWS::EC2::SecurityGroupIngress
     Properties:
       GroupId: !GetAtt PostgreSQLSecurityGroup.GroupId
       IpProtocol: tcp
@@ -724,7 +575,7 @@ Resources:
       ToPort: 5432
       CidrIp: !Ref FullVpcCIDRs
   WebServerHTTPIngress:
-    Type: 'AWS::EC2::SecurityGroupIngress'
+    Type: AWS::EC2::SecurityGroupIngress
     Properties:
       GroupId: !GetAtt WebServerSecurityGroup.GroupId
       IpProtocol: tcp
@@ -732,7 +583,7 @@ Resources:
       ToPort: 80
       CidrIp: 0.0.0.0/0
   WebServerRDPIngress:
-    Type: 'AWS::EC2::SecurityGroupIngress'
+    Type: AWS::EC2::SecurityGroupIngress
     Properties:
       GroupId: !GetAtt WebServerSecurityGroup.GroupId
       IpProtocol: tcp
@@ -747,25 +598,20 @@ Outputs:
     Description: A reference to the public subnet in the 1st Availability Zone
     Value: !Ref PublicSubnet1
   Cloud9IDE:
-    Value: !Join 
+    Value: !Join
       - ''
-      - - 'https://'
-        - !Ref 'AWS::Region'
+      - - https://
+        - !Ref AWS::Region
         - .console.aws.amazon.com/cloud9/ide/
         - !Ref C9Instance
         - '?region='
-        - !Ref 'AWS::Region'
+        - !Ref AWS::Region
   WebsiteURL:
     Description: URL for the AdventureWorks sample application
-    Value: !Join 
+    Value: !Join
       - ''
-      - - 'http://'
-        - !GetAtt 
-          - ApplicationLoadBalancer
-          - DNSName
+      - - http://
+        - !GetAtt ApplicationLoadBalancer.DNSName
         - /sampleapp
   RDSEndpoint:
-    Value: !GetAtt 
-      - RdsInstance
-      - Endpoint
-      - Address
+    Value: !GetAtt RdsInstance.Endpoint.Address
