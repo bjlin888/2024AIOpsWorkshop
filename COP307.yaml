@@ -349,11 +349,11 @@ Resources:
       AutomaticStopTimeMinutes: 3600
       InstanceType: !Ref C9InstanceType
       Name: workshop-env
-      OwnerArn: !Join
-        - ''
-        - - 'arn:aws:iam::'
-          - !Ref AWS::AccountId
-          - ':assumed-role/WSParticipantRole/Participant'
+      # OwnerArn: !Join
+      #   - ''
+      #   - - 'arn:aws:iam::'
+      #     - !Ref AWS::AccountId
+      #     - ':assumed-role/WSParticipantRole/Participant'
       Tags:
         - Key: SSMBootstrap
           Value: Active
