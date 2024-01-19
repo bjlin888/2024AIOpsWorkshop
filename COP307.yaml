@@ -19,15 +19,6 @@ Parameters:
     Type: String
     Description: IP address for security group ingress. Default to 0.0.0.0/0 (open to public)
     Default: 0.0.0.0/0
-  EETeamRoleArn:
-    Description: ARN of the Team Role
-    Type: String
-  EEAssetsBucket:
-    Description: Assets Bucket prefix
-    Type: String
-  EEAssetsBucketPrefix:
-    Description: Assets Bucket prefix
-    Type: String
   VpcCIDR1:
     Description: Anomaly Detection
     Type: String
@@ -349,11 +340,11 @@ Resources:
       AutomaticStopTimeMinutes: 3600
       InstanceType: !Ref C9InstanceType
       Name: workshop-env
-      OwnerArn: !Join
-        - ''
-        - - 'arn:aws:iam::'
-          - !Ref AWS::AccountId
-          - ':assumed-role/WSParticipantRole/Participant'
+      # OwnerArn: !Join
+      #   - ''
+      #   - - 'arn:aws:iam::'
+      #     - !Ref AWS::AccountId
+      #     - ':assumed-role/WSParticipantRole/Participant'
       Tags:
         - Key: SSMBootstrap
           Value: Active
